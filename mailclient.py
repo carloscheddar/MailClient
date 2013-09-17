@@ -8,6 +8,7 @@
 #Dependencies: dnspython -- pip install dnspython
 
 from socket import *
+import re
 import sys
 
 #import dns.resolver to get the MX server names.
@@ -15,19 +16,12 @@ try:
     import dns.resolver
 except ImportError:
     raise SystemExit("Please install dnspython using: pip install dnspython")
-try:
-    fromEmail  = sys.argv[1]
-    toEmail    = sys.argv[2]
-except:
-    raise SystemExit("Usage: mailclient.py <From Email> <To Email>")
 
-smtpPort   = 25
-#Split email to get the domain name
-domain = toEmail.split('@')[1]
-
-#Use domain to get the proper MX server
-#split the string until only the mx server is left.
-mailServer = dns.resolver.query(domain, 'MX')[0].to_text().split(' ')[1]
+#Function to validate email
+def emailvalidation(email):
+    email_pattern = re.compile('([\w\-\.]+@(\w[\w\-]+\.)+[\w\-]+)')
+    if re.match(email_pattern, email) == None:
+        raise SystemExit("Invalid email address: %s" %email)
 
 
 class MailClient():
@@ -68,6 +62,26 @@ class MailClient():
         self.receive()
         self.socket.send("quit\r\n")
         self.receive()
+
+
+#Program starts here!!
+try:
+    fromEmail  = sys.argv[1]
+    toEmail    = sys.argv[2]
+except:
+    raise SystemExit("Usage: mailclient.py <From Email> <To Email>")
+
+emailvalidation(toEmail)
+emailvalidation(fromEmail)
+
+smtpPort   = 25
+#Split email to get the domain name
+domain = toEmail.split('@')[1]
+
+#Use domain to get the proper MX server
+#split the string until only the mx server is left.
+mailServer = dns.resolver.query(domain, 'MX')[0].to_text().split(' ')[1]
+
 
 clientSocket = socket(AF_INET, SOCK_STREAM)
 
