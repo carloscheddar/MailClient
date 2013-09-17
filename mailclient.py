@@ -29,7 +29,7 @@ class MailClient():
         self.socket = socket
 
     def receive(self):
-        #Print verbose messages if the user wants to.
+        #Print verbose messages if the user imputs 'v'.
         try:
             sys.argv[3] == 'v'
             print self.socket.recv(1024)
@@ -45,21 +45,21 @@ class MailClient():
     #Function that sends and receives according to smtp protocol
     def send(self):
         self.receive()
-        self.socket.send("helo\n") #Be classy and say hello.
+        self.socket.send("helo\r\n") #Be classy and say hello.
         self.receive()
-        self.socket.send("mail from:<%s>\n"     % fromEmail)
+        self.socket.send("mail from:<%s>\r\n"     % fromEmail)
         self.receive()
-        self.socket.send("rcpt to:<%s>\n"       % toEmail)
+        self.socket.send("rcpt to:<%s>\r\n"       % toEmail)
         self.receive()
-        self.socket.send("data\n")
+        self.socket.send("data\r\n")
         self.receive()
-        self.socket.send("From: <%s>\n"         %fromEmail
-                          +"To: <%s>\n"         %toEmail
-                          +"Subject: %s\n\n"    %subject
-                          +"%s\n"               %message
+        self.socket.send("From: <%s>\r\n"         %fromEmail
+                          +"To: <%s>\r\n"         %toEmail
+                          +"Subject: %s\r\n\r\n"    %subject
+                          +"%s\r\n"               %message
                           +"\r\n.\r\n")
         self.receive()
-        self.socket.send("quit\n")
+        self.socket.send("quit\r\n")
         self.receive()
 
 clientSocket = socket(AF_INET, SOCK_STREAM)
