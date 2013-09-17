@@ -5,11 +5,11 @@
 # GitHub: carloscheddar
 #
 #Simple SMTP client using sockets.
+#Dependencies: dnspython -- pip install dnspython
 
 from socket import *
-import sys
+import sys, dns.resolver
 
-mailServer = "gmail-smtp-in.l.google.com"
 smtpPort   = 25
 try:
     fromEmail  = sys.argv[1]
@@ -17,13 +17,24 @@ try:
 except:
     raise SystemExit("Usage: mailclient.py <From Email> <To Email>")
 
+#Split email to get the domain name
+domain = toEmail.split('@')[1]
+
+#Use domain to get the proper MX server
+mailServer = dns.resolver.query(domain, 'MX')[0].to_text().split(' ')[1]
+
 
 class MailClient():
     def __init__(self, socket):
         self.socket = socket
 
     def receive(self):
-        self.socket.recv(1024)
+        #Print verbose messages if the user wants to.
+        try:
+            sys.argv[3] == 'v'
+            print self.socket.recv(1024)
+        except IndexError:
+            self.socket.recv(1024)
 
     def getinput(self):
         subject = raw_input("Enter Subject: ")
@@ -31,7 +42,7 @@ class MailClient():
         return subject, message
 
 
-    #Function that sends and receives according to smtp
+    #Function that sends and receives according to smtp protocol
     def send(self):
         self.receive()
         self.socket.send("helo\n") #Be classy and say hello.
